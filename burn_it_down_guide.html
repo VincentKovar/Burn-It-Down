@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burn It Down - 7-Day Interactive Workbook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ember: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+              950: '#431407',
+            },
+            charcoal: {
+              800: '#1f1f23',
+              850: '#18181b',
+              900: '#121215',
+              950: '#09090b',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #09090b;
+      color: #f3f4f6;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #121215;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f97316;
+    }
+
+    .glow-ember {
+      box-shadow: 0 0 25px -5px rgba(249, 115, 22, 0.25);
+    }
+    .glow-ember-sm {
+      box-shadow: 0 0 12px -2px rgba(249, 115, 22, 0.3);
+    }
+    .flame-gradient-text {
+      background: linear-gradient(135deg, #ffedd5 0%, #f97316 50%, #ef4444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .flame-bg {
+      background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-charcoal-950 text-gray-100 antialiased selection:bg-ember-600 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-charcoal-900/90 backdrop-blur-md border-b border-neutral-800/80 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flame-bg flex items-center justify-center text-white font-black text-xl shadow-lg shadow-ember-600/30">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg lg:text-xl tracking-tight text-white flex items-center gap-2">
+            BURN IT DOWN <span class="text-xs px-2 py-0.5 rounded-full bg-ember-950 text-ember-400 border border-ember-800/50 font-mono font-semibold">ONLINE WORKBOOK</span>
+          </h1>
+          <p class="text-xs text-neutral-400 hidden sm:block">7 Days of Exercises & Deep Reframing Reflections</p>
+        </div>
+      </div>
+
+      <!-- Overall Progress Summary -->
+      <div class="flex items-center gap-4">
+        <div class="hidden md:flex flex-col items-end">
+          <div class="flex items-center gap-2 text-xs font-semibold text-neutral-300">
+            <span>Overall Completion</span>
+            <span id="overall-percentage" class="text-ember-400 font-mono">0%</span>
+          </div>
+          <div class="w-44 h-2 bg-neutral-800 rounded-full overflow-hidden mt-1 border border-neutral-700/50">
+            <div id="overall-bar" class="h-full flame-bg transition-all duration-500 w-0"></div>
+          </div>
+        </div>
+
+        <!-- Global Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="openCalendarModal()" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs font-medium text-gray-200 hover:text-white transition flex items-center gap-2 shadow-sm" title="Schedule Days on Google Calendar">
+            <i class="fa-regular fa-calendar-plus text-ember-400"></i>
+            <span class="hidden sm:inline">Schedule Tasks</span>
+          </button>
+          <button onclick="openDocsExportModal()" class="px-3 py-2 rounded-lg flame-bg hover:opacity-95 text-xs font-bold text-white transition flex items-center gap-2 shadow-md shadow-ember-950" title="Export reflections for Google Docs">
+            <i class="fa-solid fa-file-export"></i>
+            <span>Export to Docs</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Wrapper -->
+  <div class="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row gap-6 p-4 lg:p-8">
+    
+    <!-- Sidebar / Day Navigation -->
+    <aside class="w-full md:w-64 lg:w-72 flex-shrink-0 space-y-4">
+      
+      <!-- Mobile Day Selector Dropdown -->
+      <div class="md:hidden bg-charcoal-900 p-3 rounded-xl border border-neutral-800">
+        <label class="block text-xs font-semibold text-neutral-400 mb-1">SELECT MODULE / DAY</label>
+        <select id="mobile-day-select" onchange="switchDay(this.value)" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white font-medium focus:outline-none focus:border-ember-500">
+          <option value="prep">Preparation Week</option>
+          <option value="day1">Day 1: The Shift & Crucible</option>
+          <option value="day2">Day 2: Cycles & Surrender</option>
+          <option value="day3">Day 3: The Deleted Scene</option>
+          <option value="day4">Day 4: Demolition & Vanishing Point</option>
+          <option value="day5">Day 5: The Hill & Plan B</option>
+          <option value="day6">Day 6: Metageno Alignment</option>
+          <option value="day7">Day 7: The Inner Voice</option>
+          <option value="dashboard">Progress & Reflection Hub</option>
+        </select>
+      </div>
+
+      <!-- Desktop Sidebar Items -->
+      <div class="hidden md:block bg-charcoal-900 rounded-2xl border border-neutral-800 p-3 shadow-xl sticky top-24">
+        <div class="px-3 py-2 border-b border-neutral-800/80 mb-2 flex items-center justify-between">
+          <span class="text-xs font-bold tracking-wider uppercase text-neutral-400">Navigation</span>
+          <span id="completed-count-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-neutral-800 text-ember-400 border border-neutral-700">0/8 DONE</span>
+        </div>
+
+        <nav class="space-y-1" id="desktop-nav">
+          <!-- Populated by JS -->
+        </nav>
+
+        <!-- Quick Stats Widget -->
+        <div class="mt-4 p-3 bg-neutral-950/60 rounded-xl border border-neutral-800/80 text-xs space-y-2">
+          <div class="flex justify-between text-neutral-400">
+            <span>Reflections Saved:</span>
+            <span id="saved-reflections-count" class="font-mono text-white">0</span>
+          </div>
+          <div class="flex justify-between text-neutral-400">
+            <span>Movies Tracked:</span>
+            <span id="movies-watched-count" class="font-mono text-ember-400">0/7</span>
+          </div>
+          <div class="pt-2 border-t border-neutral-800 flex justify-between items-center text-[11px] text-neutral-500">
+            <span>Auto-saving locally</span>
+            <i class="fa-solid fa-cloud-arrow-up text-emerald-500"></i>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 min-w-0 space-y-6">
+      
+      <!-- Top Dynamic Header Banner -->
+      <div id="module-header" class="bg-gradient-to-r from-charcoal-900 via-neutral-900 to-charcoal-900 p-6 lg:p-8 rounded-2xl border border-neutral-800 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 text-neutral-800/20 text-9xl pointer-events-none font-black select-none" id="header-bg-icon">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div class="relative z-10 max-w-2xl">
+          <div class="flex items-center gap-2 text-ember-400 text-xs font-mono font-semibold uppercase tracking-wider mb-2" id="header-category">
+            <i class="fa-solid fa-compass"></i> PREPARATION
+          </div>
+          <h2 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight" id="header-title">Preparation For The Week Ahead</h2>
+          <p class="text-sm text-neutral-300 mt-2 leading-relaxed" id="header-desc">Essential ground rules, physical relocations, and digital blackouts required before burning down old patterns.</p>
+        </div>
+      </div>
+
+      <!-- Dynamic Content Container -->
+      <div id="content-container">
+        <!-- JS will render active day component here -->
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Google Calendar Integration Modal -->
+  <div id="calendar-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-900 border border-neutral-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeCalendarModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-white p-2 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-neutral-800 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center text-lg font-bold">
+          <i class="fa-regular fa-calendar-check"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Google Calendar Scheduler</h3>
+          <p class="text-xs text-neutral-400">Schedule your preparation and 7 days of reflection sessions into Google Calendar.</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-neutral-300 mb-1">Start Date for Program</label>
+          <input type="date" id="gcal-start-date" class="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-ember-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-neutral-300 mb-1">Pacing Mode</label>
+          <select id="gcal-pace" class="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-ember-500">
+            <option value="daily">Daily Intensive (1 day = 1 calendar day)</option>
+            <option value="two-days">Spaced Pace (1 day = 2 calendar days)</option>
+            <option value="weekly">Weekly Deep Dive (1 day = 1 week)</option>
+          </select>
+        </div>
+
+        <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-800 space-y-2">
+          <div class="text-xs font-semibold text-neutral-300 flex items-center justify-between">
+            <span>Generated Schedule Links</span>
+            <span class="text-[10px] text-neutral-500">Opens in Google Calendar</span>
+          </div>
+          <div id="gcal-links-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <!-- Dynamic links generated by JS -->
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button onclick="downloadICSFile()" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+            <i class="fa-solid fa-download"></i> Download .ICS Calendar File
+          </button>
+          <button onclick="closeCalendarModal()" class="px-4 py-2 bg-ember-600 hover:bg-ember-500 text-white rounded-xl text-xs font-bold transition">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Docs Export & Sync Modal -->
+  <div id="docs-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-900 border border-neutral-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative space-y-5 max-h-[90vh] flex flex-col">
+      <button onclick="closeDocsModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-white p-2 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-neutral-800 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-lg font-bold">
+          <i class="fa-solid fa-file-word"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Export Reflections for Google Docs</h3>
+          <p class="text-xs text-neutral-400">Copy your formatted reflections to paste into Google Docs or export as a clean document.</p>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-hidden flex flex-col space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-neutral-400">FORMATTED REFLECTION DOCUMENT DRAFT</span>
+          <div class="flex gap-2">
+            <a href="https://docs.new" target="_blank" class="px-2.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Google Docs (docs.new)
+            </a>
+            <button onclick="copyDocsText()" id="copy-docs-btn" class="px-3 py-1.5 flame-bg text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> Copy to Clipboard
+            </button>
+          </div>
+        </div>
+
+        <textarea id="docs-export-text" readonly class="flex-1 w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-xs font-mono text-neutral-300 focus:outline-none resize-none leading-relaxed min-h-[250px]"></textarea>
+      </div>
+
+      <div class="pt-3 border-t border-neutral-800 flex justify-between items-center text-xs text-neutral-400">
+        <span>Tip: Click "Copy to Clipboard", then open Google Docs and press Ctrl+V / Cmd+V.</span>
+        <button onclick="closeDocsModal()" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-semibold">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <script>
+    /* STORE & STATE MANAGEMENT */
+    const STORAGE_KEY = 'burn_it_down_workbook_v1';
+
+    // Core Data Schema for Workbook Content
+    const WORKBOOK_DATA = {
+      prep: {
+        id: 'prep',
+        title: 'Preparation For The Week Ahead',
+        category: 'FOUNDATION',
+        icon: 'fa-compass',
+        desc: 'Ground rules, nature isolation, and news blackout to prepare your mind for reframing.',
+        checklists: [
+          { id: 'prep_c1', title: 'Perform an act of selfless sacrifice', desc: 'Build or move something heavy for an elderly person, or do a pure act of service with zero expectation of payment or reward.' },
+          { id: 'prep_c2', title: 'Get out into nature alone without phone', desc: 'Isolate yourself in nature, away from routine surroundings to dramatically shift your perspective.' },
+          { id: 'prep_c3', title: 'Declare a 7-day media blackout', desc: 'Cut off algorithm-driven headlines, doom-scrolling, and negative news streams for the duration of the workbook.' }
+        ],
+        reflections: [
+          { id: 'prep_r1', label: 'Selfless Act Reflection', prompt: 'Describe the act of service you performed. How did it feel doing work requiring sweat without taking reward?' },
+          { id: 'prep_r2', label: 'Nature & Location Shift', prompt: 'Where did you go in nature? What subtle changes in thoughts did you observe away from your usual setup?' }
+        ]
+      },
+      day1: {
+        id: 'day1',
+        title: 'Day One: The Shift & Crucible',
+        category: 'DAY 1',
+        icon: 'fa-fire-flame-curved',
+        movie: { title: 'Scent of a Woman', desc: 'Handpicked by James for Night 1' },
+        reflections: [
+          { id: 'd1_r1', label: 'Version A: Victim Lens', prompt: 'Write the sentence "Why did this happen?" and answer it as: Why did this happen to ME?' },
+          { id: 'd1_r2', label: 'Version B: Destiny Lens', prompt: 'Answer the sentence: WHY did this happen to me? Compare with Version A. Which keeps you in Act Two vs. Act Three?' },
+          { id: 'd1_r3', label: 'Name the Specific Event / Collapse', prompt: 'What exactly happened? What was lost, broken, or destroyed? What expectation did reality refuse to meet? Define the shape of your pain.' },
+          { id: 'd1_r4', label: 'Flawed Expectations Audit', prompt: 'What age did you believe you would "arrive"? What did you expect to have by now? Which were inherited vs chosen?' },
+          { id: 'd1_r5', label: 'The Fork Choice', prompt: 'Option A: Return to old trajectory / repeat Act Two. Option B: Reforge & choose different future. Which option do you choose and why?' }
+        ],
+        bookClub: 'The chapter challenges readers to view their pain as part of a larger, more meaningful story. Reject the idea that life should be smooth and reframe adversity as the crucible that forges your future.'
+      },
+      day2: {
+        id: 'day2',
+        title: 'Day Two: Cycles & Surrender',
+        category: 'DAY 2',
+        icon: 'fa-rotate-right',
+        movie: { title: 'Regarding Henry', desc: 'Handpicked by James for Night 2' },
+        checklists: [
+          { id: 'd2_c1', title: 'The Pond Drill', desc: 'Sit in stillness for 10 minutes today—no phone, no agenda. SINK beneath surface thought waves into quiet depth.' },
+          { id: 'd2_c2', title: 'Noise Audit', desc: 'Track every background stimulation source today (music, chatter, screens). Remove at least two sources completely.' },
+          { id: 'd2_c3', title: 'No-Judgement Day Experiment', desc: 'Try passing through 24 hours without forming any negative or critical judgements about anything or anyone.' }
+        ],
+        reflections: [
+          { id: 'd2_r1', label: 'Current Cycle Identification', prompt: 'What cycle are you currently in—rise, fall, or hinge point between them? Describe the concrete evidence.' },
+          { id: 'd2_r2', label: 'Name the Ending You Resisting', prompt: 'What ending have you refused to allow (relationship, identity, role, belief)? What has keeping it alive cost you?' },
+          { id: 'd2_r3', label: 'Demeter Spring Forecast', prompt: 'If you allowed this ending to complete itself, what "spring" might naturally follow?' },
+          { id: 'd2_r4', label: 'False Perspective Audit (3 Sunset Beliefs)', prompt: 'Write 3 "sunset beliefs" (false literal truths) and rewrite each as "Earth rising" (truer, larger-scale perspective).' },
+          { id: 'd2_r5', label: 'Surrender vs Defeat', prompt: 'Where have you confused surrender with defeat? What would genuine, conscious surrender look like today?' },
+          { id: 'd2_r6', label: 'Closing Insight', prompt: 'Complete this thought: "If I am rising, then..."' }
+        ],
+        bookClub: 'The pivot from reaction to stillness. If inner peace is available right now, why are you still negotiating for it?'
+      },
+      day3: {
+        id: 'day3',
+        title: 'Day Three: The Deleted Scene',
+        category: 'DAY 3',
+        icon: 'fa-masks-theater',
+        movie: { title: 'Oblivion', desc: 'Handpicked by James for Night 3' },
+        reflections: [
+          { id: 'd3_r1', label: 'Name the Scene', prompt: 'Describe the deleted scene you witnessed in 1 sentence. Not why it happened or what it means, just the scene itself.' },
+          { id: 'd3_r2', label: 'Identify Actors', prompt: 'Child Self (describe in 5-10 words) & Oppressor Figure (describe role, not identity).' },
+          { id: 'd3_r3', label: 'Who Wrote Their Lines?', prompt: 'Who taught child self what they had to be? Who taught oppressor their lines? What belief was installed as the lesson?' },
+          { id: 'd3_r4', label: 'The Freeze-Frame Moment', prompt: 'What did the child do when you took their hand? Name the quality/energy returned to you.' },
+          { id: 'd3_r5', label: 'The Tired Script Line', prompt: 'Which line from the old script once controlled you but now feels tired, hollow, or false?' },
+          { id: 'd3_r6', label: 'Integrated Living Statement', prompt: 'Write one clean sentence about how you will live now that this deleted scene is integrated.' }
+        ],
+        cravingExperiment: true,
+        bookClub: 'Exposing the past to fire until it cannot control you. The Deleted Scene is not a memory to rewrite, but a power source to reclaim.'
+      },
+      day4: {
+        id: 'day4',
+        title: 'Day Four: Demolition & Vanishing Point',
+        category: 'DAY 4',
+        icon: 'fa-skull',
+        movie: { title: 'Good Will Hunting', desc: 'Handpicked by James for Night 4' },
+        reflections: [
+          { id: 'd4_r1', label: 'Scar-Script (3 Sentences Only)', prompt: 'Sentence 1: "The event was..." | Sentence 2: "The story I\'ve been telling is..." | Sentence 3: "The cost of telling it is..."' },
+          { id: 'd4_r2', label: 'False Vanishing Point', prompt: 'What did you think you were walking toward (closure, apology, validation)? Has this light at the end moved closer, or only kept you walking?' },
+          { id: 'd4_r3', label: 'Canvas Autopsy', prompt: 'List paint layers (old beliefs, wounds, roles). Circle the oldest/stickiest layer that your perception bends around.' },
+          { id: 'd4_r4', label: 'Gatekeeper of Evolution', prompt: 'Name the person/role you think owes you closure. Finish: "I have made them the gatekeeper of my evolution by..."' },
+          { id: 'd4_r5', label: 'Burning Narrative', prompt: 'Complete: "If I burned this narrative today, the first unfamiliar feeling I would face is..."' }
+        ],
+        titanicAudit: true,
+        bookClub: 'Dismantling the idea that storytelling is always healing. You may be addicted to your own narrative. Stop narrating—get in the boat.'
+      },
+      day5: {
+        id: 'day5',
+        title: 'Day Five: The Hill & Plan B',
+        category: 'DAY 5',
+        icon: 'fa-mountain-sun',
+        movie: { title: 'Miracle', desc: 'Handpicked by James for Night 5' },
+        reflections: [
+          { id: 'd5_r1', label: 'Scale & Point A/B Audit', prompt: 'List 5 areas you rate yourself on. Mark Point A (where you think you are) & Point B (where you should be). Which Point B was < 10 and why?' },
+          { id: 'd5_r2', label: 'The Three Real Adversaries', prompt: 'Name 3 fear sources (forces, not people). Which one freezes you most and what EXACT behavior does it cause?' },
+          { id: 'd5_r3', label: 'Skating Backwards / Dropping Gloves', prompt: 'Recall when you skated backwards in life. What would "dropping the gloves" look like right now in action?' },
+          { id: 'd5_r4', label: 'Sham Castle & Hidden Plan B', prompt: 'What looks like a castle but is actually a façade you hide behind? Where do you have a hidden Plan B?' },
+          { id: 'd5_r5', label: '10-Year Future Message', prompt: 'Standing 10 years in the future looking back, what single most urgent action would you tell yourself to take today?' },
+          { id: 'd5_r6', label: 'Death Rehearsal (Nachiketa)', prompt: 'What worldly temptations or easy compromises would you reject right now to arrive at core truth?' }
+        ],
+        bookClub: 'Plan B must die. Eliminate psychological exit ramps that make retreat possible.'
+      },
+      day6: {
+        id: 'day6',
+        title: 'Day Six: Metageno Alignment',
+        category: 'DAY 6',
+        icon: 'fa-fingerprint',
+        movie: { title: 'American Beauty', desc: 'Handpicked by James for Night 6' },
+        reflections: [
+          { id: 'd6_r1', label: 'Dominant Driver Demand', prompt: 'What does your Sheridan-Metageno Dominant Driver actually demand of you? (Not what others think it should demand).' },
+          { id: 'd6_r2', label: 'Detect Your Defiance', prompt: 'List 3 areas where effort felt like friction or burnout. What were you trying to prove and to whom?' },
+          { id: 'd6_r3', label: 'Identify Your Canal', prompt: 'List 5 expressions of your type. Which one makes time disappear for you?' },
+          { id: 'd6_r4', label: 'Strip The Mask', prompt: 'Which parts of life feel like performance? Where are you conforming out of fear?' },
+          { id: 'd6_r5', label: 'Draft The Treaty', prompt: 'In 3-4 sentences, write your type-aligned vision (reflect Dominant Driver, no pride, feels like coming home).' },
+          { id: 'd6_r6', label: 'Set The Clock', prompt: 'Choose a milestone and date. Sign with: "Pressure without punishment. Discipline without drama. Fire without fear."' }
+        ],
+        personalityTestLink: 'https://email.mg.doddmeadand.co/c/eJxslMuSojwcxZ8GdnRBIFwWLERFbFttb6hsrJCEi0CCISL69F_ZM_XVVM1ssvgnJ6dO6vyCLyXxv50laR6jgubl-nULunAPoEp82wLANFTCG1Qyv8k_CCekoYggRj4w_71x4Q9GRVeU7UU-W-rXHCNZ8l9zolLfcDwdAtvxPJU2qKwvDe06lNO3cwyiURWxPGcRcuveOvK6_33q57IHF1VW88cfs7eMWrZhAAo0QqCjWRn1NA9QV8N26nimbRPLSv-UdJK2b52LbS8zbUvD0DM0i-qmlloG0EydmtDRTWBnVKWsLwVnDWXSbwUnd_yOoxY-dIBt6oaFDd11MQAOJCYC2IXAgy4Chlr6QAe27gHHsE3T8D4yw0gR8VzbSzPsZlCx9L-fsfYLKdtOMUcKCBUQNlSinDL-wahUQNg1rdRSUdKsZLla48uvXCWTVDBU-wcQdmQWVyfDW9PrU5zMqb7srVm2F10G26Ne4WPYsm9kNdFmVzYRS-gWfuHzKgxF3xzybZIa27ibwfjzdKsO0KQOCsdzJNOhmgyDAkJRDGx53bT0Na2TcNb00Ozd-VWivT1zXibE9XU_5V8gCIb6FKViEp9bvnwkjcztSAHBSAHB6dmVX3RVTcZ9iUYGtXf0CVnxqYCABuTbySsnexJmxbvYfCggWHzP32s5NKNkvFg6iQKC-W4I5rziRqjvrX2ymPdHDOpoVlXPx_2W1XyVllu-fda2Tca36tzLYEtM3azGjZesx4NBCgWEUTULYZfG7VB0r2RxFKJenarNfVIrIFizgxit0iyxLJPRVZgssR0t1-3N_cZreChe003fpmcmJpPoubnRfnGcfTEn8pLY4L1stuMpXM1e835zBShptxin8bCsnSi5O3keT4MHCe_PM64eRwUE1n4ZuPsJHB92-fWTHjcre35zRaXW_AfM2-yr2BnJ9TFsN4uhBhHJBrWhsuDER22ptoL3JaHCrykimDNGseRCFX4vUM8rxdLzd1k-MG_Ujt8Fpv5Pe7Sy67U3W1So8k3s5Z9O0se8ufzzd5A-lZf_6ex98F8AAAD__yqKcgQ',
+        bookClub: 'If personality is structurally fixed, alignment rather than endless self-improvement is the path to freedom.'
+      },
+      day7: {
+        id: 'day7',
+        title: 'Day Seven: The Inner Voice',
+        category: 'DAY 7',
+        icon: 'fa-volcano',
+        movie: { title: 'Field of Dreams', desc: 'Handpicked by James for Night 7 (or flight home)' },
+        reflections: [
+          { id: 'd7_r1', label: 'Identify Your Two Selves', prompt: 'What is your true Self pulling you toward vs what is ego narrating? Where do these two voices directly contradict?' },
+          { id: 'd7_r2', label: 'Track Internal Noise', prompt: 'List 3 moments from this week where ego added narrative. How would a 3-year-old in a car seat perceive those same moments?' },
+          { id: 'd7_r3', label: 'Storm Recognition Drill', prompt: 'Recall a panic/spiral moment in past month. What was the downdraft? What instrument panel were you fixated on? What was the shaft of light?' },
+          { id: 'd7_r4', label: 'Inner Voice Audit', prompt: 'When did you last feel the Inner Voice directive? Did you obey? What cleared or happened?' },
+          { id: 'd7_r5', label: 'Integration Commitments', prompt: '"I will silence narrative by..." (concrete behavior) & "I will listen for directive by..." (cue).' },
+          { id: 'd7_r6', label: 'The Final Question', prompt: 'Where in your life right now are you still flying only by instruments when the Voice is telling you to look up?' }
+        ],
+        bookClub: 'A test of whether you can hear the Inner Voice over internal noise. The Voice speaks once. Don\'t miss it.'
+      },
+      dashboard: {
+        id: 'dashboard',
+        title: 'Progress & Reflection Hub',
+        category: 'OVERVIEW',
+        icon: 'fa-chart-pie',
+        desc: 'Review all completed sections, movie nights tracked, and quick export tools.'
+      }
+    };
+
+    // Application State stored in LocalStorage
+    let appState = {
+      activeDay: 'prep',
+      checkedItems: {},
+      reflections: {},
+      moviesWatched: {},
+      cravingLogs: []
+    };
+
+    // Load state on boot
+    function initAppState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          appState = { ...appState, ...JSON.parse(saved) };
+        }
+      } catch (e) {
+        console.warn('Could not load stored workbook state', e);
+      }
+      renderNavigation();
+      switchDay(appState.activeDay || 'prep');
+      updateGlobalStats();
+    }
+
+    function saveAppState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        updateGlobalStats();
+      } catch (e) {
+        console.warn('Failed to save state', e);
+      }
+    }
+
+    function renderNavigation() {
+      const navContainer = document.getElementById('desktop-nav');
+      if (!navContainer) return;
+
+      navContainer.innerHTML = '';
+
+      Object.keys(WORKBOOK_DATA).forEach(dayKey => {
+        const item = WORKBOOK_DATA[dayKey];
+        const isActive = appState.activeDay === dayKey;
+        const progress = calculateDayProgress(dayKey);
+
+        const btn = document.createElement('button');
+        btn.onclick = () => switchDay(dayKey);
+        btn.className = `w-full text-left px-3 py-2.5 rounded-xl transition flex items-center justify-between group ${
+          isActive 
+            ? 'bg-ember-600/20 border border-ember-500/40 text-white font-bold glow-ember-sm' 
+            : 'hover:bg-neutral-800/80 text-neutral-400 hover:text-white border border-transparent'
+        }`;
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-lg ${isActive ? 'bg-ember-500 text-white' : 'bg-neutral-800 text-neutral-400 group-hover:text-ember-400'} flex items-center justify-center text-xs transition">
+              <i class="fa-solid ${item.icon}"></i>
+            </div>
+            <span class="text-xs truncate font-medium">${item.title.split(':')[0]}</span>
+          </div>
+          ${progress === 100 
+            ? '<i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i>' 
+            : `<span class="text-[10px] font-mono text-neutral-500">${progress}%</span>`}
+        `;
+
+        navContainer.appendChild(btn);
+      });
+    }
+
+    function switchDay(dayKey) {
+      if (!WORKBOOK_DATA[dayKey]) return;
+      appState.activeDay = dayKey;
+      saveAppState();
+
+      // Sync Mobile Dropdown
+      const mobileSelect = document.getElementById('mobile-day-select');
+      if (mobileSelect) mobileSelect.value = dayKey;
+
+      // Update Header
+      const data = WORKBOOK_DATA[dayKey];
+      document.getElementById('header-category').innerHTML = `<i class="fa-solid ${data.icon}"></i> ${data.category}`;
+      document.getElementById('header-title').innerText = data.title;
+      document.getElementById('header-desc').innerText = data.desc || `Interactive reflections and exercises for ${data.title}.`;
+      document.getElementById('header-bg-icon').className = `fa-solid ${data.icon} absolute -right-10 -bottom-10 text-neutral-800/20 text-9xl pointer-events-none font-black select-none`;
+
+      renderNavigation();
+
+      // Render Content View
+      const container = document.getElementById('content-container');
+      if (dayKey === 'dashboard') {
+        container.innerHTML = renderDashboardView();
+      } else {
+        container.innerHTML = renderDayView(data);
+      }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderDayView(data) {
+      let html = `<div class="space-y-6">`;
+
+      // 1. Movie Section (if present)
+      if (data.movie) {
+        const isWatched = appState.moviesWatched[data.id] || false;
+        html += `
+          <div class="bg-gradient-to-r from-neutral-900 via-charcoal-900 to-neutral-900 p-4 lg:p-5 rounded-2xl border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-film"></i>
+              </div>
+              <div>
+                <div class="text-[10px] font-mono font-bold text-purple-400 tracking-wider">TONIGHT'S MOVIE RECOMMENDATION</div>
+                <h4 class="text-base font-bold text-white flex items-center gap-2">
+                  "${data.movie.title}"
+                </h4>
+                <p class="text-xs text-neutral-400">${data.movie.desc}</p>
+              </div>
+            </div>
+            <button onclick="toggleMovieWatched('${data.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+              isWatched ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700'
+            }">
+              <i class="fa-solid ${isWatched ? 'fa-check-circle' : 'fa-circle'}"></i>
+              <span>${isWatched ? 'Movie Watched' : 'Mark Watched'}</span>
+            </button>
+          </div>
+        `;
+      }
+
+      // 2. Interactive Checklists (if any)
+      if (data.checklists && data.checklists.length > 0) {
+        html += `
+          <div class="bg-charcoal-900 p-5 rounded-2xl border border-neutral-800 space-y-3">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-ember-400"></i> Action Items & Exercises
+            </h3>
+            <div class="space-y-2">
+        `;
+        data.checklists.forEach(item => {
+          const checked = appState.checkedItems[item.id] || false;
+          html += `
+            <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-950/70 border border-neutral-800/80 hover:border-neutral-700 transition cursor-pointer group">
+              <input type="checkbox" onchange="toggleCheckitem('${item.id}')" ${checked ? 'checked' : ''} class="mt-0.5 w-4 h-4 rounded border-neutral-700 text-ember-600 focus:ring-ember-500 bg-neutral-900">
+              <div class="text-xs">
+                <span class="font-bold text-white group-hover:text-ember-300 transition ${checked ? 'line-through text-neutral-500' : ''}">${item.title}</span>
+                <p class="text-neutral-400 mt-0.5 ${checked ? 'text-neutral-600' : ''}">${item.desc}</p>
+              </div>
+            </label>
+          `;
+        });
+        html += `</div></div>`;
+      }
+
+      // 3. Special Interactive Tool Widgets (Day 3 Craving / Day 4 Titanic / Day 6 Metageno)
+      if (data.cravingExperiment) {
+        html += renderCravingTool();
+      }
+      if (data.titanicAudit) {
+        html += renderTitanicAuditTool();
+      }
+      if (data.personalityTestLink) {
+        html += `
+          <div class="p-4 bg-amber-950/20 border border-amber-800/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-xs text-amber-200">
+              <strong class="font-bold text-amber-400">Sheridan-Metageno Test Required:</strong> Take the official personality test before answering Day 6 prompts.
+            </div>
+            <a href="${data.personalityTestLink}" target="_blank" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+              Take Test <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        `;
+      }
+
+      // 4. Prompts & Reflections Section
+      if (data.reflections && data.reflections.length > 0) {
+        html += `
+          <div class="bg-charcoal-900 p-5 lg:p-6 rounded-2xl border border-neutral-800 space-y-6">
+            <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-ember-400"></i> Reflection Prompts & Answers
+              </h3>
+              <span class="text-[10px] text-neutral-400 font-mono">Auto-saved to local memory</span>
+            </div>
+            <div class="space-y-5">
+        `;
+
+        data.reflections.forEach((ref, index) => {
+          const value = appState.reflections[ref.id] || '';
+          html += `
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-ember-400 tracking-wide uppercase">
+                ${index + 1}. ${ref.label}
+              </label>
+              <p class="text-xs text-neutral-300 leading-relaxed bg-neutral-950/50 p-3 rounded-xl border border-neutral-800/60 font-medium">
+                ${ref.prompt}
+              </p>
+              <textarea 
+                id="${ref.id}" 
+                oninput="handleReflectionInput('${ref.id}', this.value)"
+                placeholder="Type your honest response here..."
+                class="w-full bg-neutral-950 border border-neutral-800 focus:border-ember-500/70 rounded-xl p-3.5 text-xs text-neutral-200 placeholder-neutral-600 focus:outline-none transition leading-relaxed min-h-[100px]"
+              >${value}</textarea>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      }
+
+      // 5. Book Club Notes Accordion
+      if (data.bookClub) {
+        html += `
+          <div class="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-800 text-xs text-neutral-300 space-y-2">
+            <div class="font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-book-bookmark text-ember-500"></i> BOOK CLUB DEEP REFLECTION NOTES
+            </div>
+            <p class="text-neutral-400 leading-relaxed italic">${data.bookClub}</p>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+      return html;
+    }
+
+    function renderCravingTool() {
+      const logs = appState.cravingLogs || [];
+      return `
+        <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+            <div>
+              <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-vial text-ember-400"></i> Craving Experiment: Censor vs. Director Audit
+              </h4>
+              <p class="text-xs text-neutral-400">When a craving hits, pause 120 seconds. Record your experiment below.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input id="craving-target" type="text" placeholder="Craving (e.g. Scroll phone, cake)" class="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-ember-500">
+            <input id="craving-feeling" type="text" placeholder="It is trying to block feeling..." class="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-ember-500">
+            <select id="craving-outcome" class="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-ember-500">
+              <option value="Censor (Subsided/Numbed)">Outcome: Censor (Fog / Numbing)</option>
+              <option value="Director (Surfaced Memory/Clarity)">Outcome: Director (Clarity / Surfaced Memory)</option>
+            </select>
+          </div>
+
+          <button onclick="addCravingLog()" class="w-full py-2 flame-bg text-white rounded-xl text-xs font-bold hover:opacity-90 transition">
+            Log Craving Experiment Entry
+          </button>
+
+          ${logs.length > 0 ? `
+            <div class="space-y-1.5 max-h-40 overflow-y-auto pt-2 border-t border-neutral-800">
+              ${logs.map((l, i) => `
+                <div class="flex items-center justify-between p-2 bg-neutral-950 rounded-lg text-[11px] border border-neutral-800">
+                  <span class="font-bold text-ember-400">${l.target}</span>
+                  <span class="text-neutral-400 truncate max-w-[150px]">${l.feeling}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] bg-neutral-800 text-neutral-300">${l.outcome}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderTitanicAuditTool() {
+      return `
+        <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 space-y-3">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-ship text-ember-400"></i> The Titanic Delay Tactics Self-Audit
+          </h4>
+          <p class="text-xs text-neutral-400">Which delaying tactic most applies to how you avoid immediate action?</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-800">
+              <strong class="text-ember-400 block mb-1">"I just need more time."</strong>
+              <p class="text-neutral-400 text-[11px]">Lesson: Time doesn't heal; truth and action do.</p>
+            </div>
+            <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-800">
+              <strong class="text-ember-400 block mb-1">"Once I understand why..."</strong>
+              <p class="text-neutral-400 text-[11px]">Lesson: Stop narrating. Get in the boat.</p>
+            </div>
+            <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-800">
+              <strong class="text-ember-400 block mb-1">"I'm feeling my feelings."</strong>
+              <p class="text-neutral-400 text-[11px]">Lesson: Feelings without action = frostbite.</p>
+            </div>
+            <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-800">
+              <strong class="text-ember-400 block mb-1">"I just need to feel seen."</strong>
+              <p class="text-neutral-400 text-[11px]">Lesson: Being seen is not being saved. Swim.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDashboardView() {
+      const savedCount = Object.keys(appState.reflections).filter(k => appState.reflections[k].trim() !== '').length;
+      const moviesCount = Object.keys(appState.moviesWatched).filter(k => appState.moviesWatched[k]).length;
+
+      return `
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-charcoal-900 p-5 rounded-2xl border border-neutral-800 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-ember-600/20 text-ember-400 border border-ember-500/30 flex items-center justify-center text-xl font-black">
+                ${getOverallProgress()}%
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">Overall Progress</div>
+                <div class="text-xs text-neutral-400">Total workbook completion</div>
+              </div>
+            </div>
+
+            <div class="bg-charcoal-900 p-5 rounded-2xl border border-neutral-800 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-xl font-black">
+                ${savedCount}
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">Reflections Saved</div>
+                <div class="text-xs text-neutral-400">Prompts answered</div>
+              </div>
+            </div>
+
+            <div class="bg-charcoal-900 p-5 rounded-2xl border border-neutral-800 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-xl font-black">
+                ${moviesCount}/7
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">Movies Watched</div>
+                <div class="text-xs text-neutral-400">Evening films completed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Completion Breakdown Table -->
+          <div class="bg-charcoal-900 p-6 rounded-2xl border border-neutral-800 space-y-4">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-ember-400"></i> Module Completion Matrix
+            </h3>
+
+            <div class="space-y-3">
+              ${Object.keys(WORKBOOK_DATA).filter(k => k !== 'dashboard').map(key => {
+                const item = WORKBOOK_DATA[key];
+                const pct = calculateDayProgress(key);
+                return `
+                  <div class="flex items-center justify-between p-3 bg-neutral-950 rounded-xl border border-neutral-800">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-lg bg-neutral-800 text-ember-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid ${item.icon}"></i>
+                      </div>
+                      <span class="text-xs font-bold text-white">${item.title}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <div class="w-28 h-2 bg-neutral-800 rounded-full overflow-hidden border border-neutral-700">
+                        <div class="h-full flame-bg transition-all duration-300" style="width: ${pct}%"></div>
+                      </div>
+                      <span class="text-xs font-mono font-bold text-neutral-400 w-10 text-right">${pct}%</span>
+                      <button onclick="switchDay('${key}')" class="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-white rounded-lg transition">
+                        Open
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Quick Actions Panel -->
+          <div class="p-6 bg-gradient-to-r from-ember-950/40 via-charcoal-900 to-neutral-900 rounded-2xl border border-ember-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h4 class="text-base font-bold text-white">Ready to save your completed reflections?</h4>
+              <p class="text-xs text-neutral-300">Generate a Google Docs-compatible text document or export your calendar schedule.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="openDocsExportModal()" class="px-4 py-2.5 flame-bg text-white rounded-xl text-xs font-bold shadow-md hover:opacity-95 transition">
+                Export to Google Docs
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleReflectionInput(id, text) {
+      appState.reflections[id] = text;
+      saveAppState();
+    }
+
+    function toggleCheckitem(id) {
+      appState.checkedItems[id] = !appState.checkedItems[id];
+      saveAppState();
+      renderNavigation();
+    }
+
+    function toggleMovieWatched(dayId) {
+      appState.moviesWatched[dayId] = !appState.moviesWatched[dayId];
+      saveAppState();
+      switchDay(dayId);
+      showToast(appState.moviesWatched[dayId] ? 'Movie marked as watched!' : 'Movie status updated.');
+    }
+
+    function addCravingLog() {
+      const target = document.getElementById('craving-target').value.trim();
+      const feeling = document.getElementById('craving-feeling').value.trim();
+      const outcome = document.getElementById('craving-outcome').value;
+
+      if (!target) {
+        showToast('Please enter what you were craving.');
+        return;
+      }
+
+      if (!appState.cravingLogs) appState.cravingLogs = [];
+      appState.cravingLogs.unshift({ target, feeling, outcome, date: new Date().toLocaleDateString() });
+      saveAppState();
+      switchDay('day3');
+      showToast('Craving log saved!');
+    }
+
+    // Progress Calculations
+    function calculateDayProgress(dayKey) {
+      const data = WORKBOOK_DATA[dayKey];
+      if (!data) return 0;
+      let total = 0;
+      let done = 0;
+
+      if (data.checklists) {
+        data.checklists.forEach(c => {
+          total++;
+          if (appState.checkedItems[c.id]) done++;
+        });
+      }
+
+      if (data.reflections) {
+        data.reflections.forEach(r => {
+          total++;
+          if (appState.reflections[r.id] && appState.reflections[r.id].trim().length > 0) done++;
+        });
+      }
+
+      if (data.movie) {
+        total++;
+        if (appState.moviesWatched[data.id]) done++;
+      }
+
+      return total > 0 ? Math.round((done / total) * 100) : 0;
+    }
+
+    function getOverallProgress() {
+      const keys = Object.keys(WORKBOOK_DATA).filter(k => k !== 'dashboard');
+      let sum = 0;
+      keys.forEach(k => sum += calculateDayProgress(k));
+      return Math.round(sum / keys.length);
+    }
+
+    function updateGlobalStats() {
+      const pct = getOverallProgress();
+      const bar = document.getElementById('overall-bar');
+      const text = document.getElementById('overall-percentage');
+      if (bar) bar.style.width = `${pct}%`;
+      if (text) text.innerText = `${pct}%`;
+
+      const savedCount = Object.keys(appState.reflections).filter(k => appState.reflections[k].trim() !== '').length;
+      const moviesCount = Object.keys(appState.moviesWatched).filter(k => appState.moviesWatched[k]).length;
+
+      const savedEl = document.getElementById('saved-reflections-count');
+      const moviesEl = document.getElementById('movies-watched-count');
+      if (savedEl) savedEl.innerText = savedCount;
+      if (moviesEl) moviesEl.innerText = `${moviesCount}/7`;
+    }
+
+    function openCalendarModal() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('gcal-start-date').value = today;
+      generateGCalLinks();
+
+      document.getElementById('gcal-start-date').onchange = generateGCalLinks;
+      document.getElementById('gcal-pace').onchange = generateGCalLinks;
+
+      document.getElementById('calendar-modal').classList.remove('hidden');
+    }
+
+    function closeCalendarModal() {
+      document.getElementById('calendar-modal').classList.add('hidden');
+    }
+
+    function generateGCalLinks() {
+      const startDateVal = document.getElementById('gcal-start-date').value;
+      const pace = document.getElementById('gcal-pace').value;
+      if (!startDateVal) return;
+
+      const startDate = new Date(startDateVal);
+      const linksContainer = document.getElementById('gcal-links-list');
+      linksContainer.innerHTML = '';
+
+      const modules = [
+        { key: 'prep', title: 'Preparation Week & Blackout' },
+        { key: 'day1', title: 'Day 1: The Shift & Crucible' },
+        { key: 'day2', title: 'Day 2: Cycles & Surrender' },
+        { key: 'day3', title: 'Day 3: The Deleted Scene' },
+        { key: 'day4', title: 'Day 4: Demolition & Vanishing Point' },
+        { key: 'day5', title: 'Day 5: The Hill & Plan B' },
+        { key: 'day6', title: 'Day 6: Metageno Alignment' },
+        { key: 'day7', title: 'Day 7: The Inner Voice' },
+      ];
+
+      let dayMultiplier = 1;
+      if (pace === 'two-days') dayMultiplier = 2;
+      if (pace === 'weekly') dayMultiplier = 7;
+
+      modules.forEach((mod, index) => {
+        const eventDate = new Date(startDate);
+        eventDate.setDate(startDate.getDate() + (index * dayMultiplier));
+
+        const isoDate = eventDate.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
+        const title = encodeURIComponent(`Burn It Down: ${mod.title}`);
+        const details = encodeURIComponent(`Self-reflection & workbook session for ${mod.title}.\nAccess your interactive guide to complete the exercise.`);
+
+        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${isoDate}T090000Z/${isoDate}T100000Z&details=${details}`;
+
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-2 bg-neutral-900 rounded-lg text-xs border border-neutral-800';
+        div.innerHTML = `
+          <div>
+            <span class="font-bold text-white block">${mod.title}</span>
+            <span class="text-[10px] text-neutral-400">${eventDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+          </div>
+          <a href="${gcalUrl}" target="_blank" class="px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded text-[11px] font-semibold flex items-center gap-1 transition">
+            + Google Calendar
+          </a>
+        `;
+        linksContainer.appendChild(div);
+      });
+    }
+
+    function downloadICSFile() {
+      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Burn It Down Online Workbook//EN\n";
+      const startDateVal = document.getElementById('gcal-start-date').value || new Date().toISOString().split('T')[0];
+      const startDate = new Date(startDateVal);
+
+      const modules = [
+        'prep', 'day1', 'day2', 'day3', 'day4', 'day5', 'day6', 'day7'
+      ];
+
+      modules.forEach((key, index) => {
+        const mod = WORKBOOK_DATA[key];
+        const eventDate = new Date(startDate);
+        eventDate.setDate(startDate.getDate() + index);
+        const isoStr = eventDate.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
+
+        icsContent += "BEGIN:VEVENT\n";
+        icsContent += `SUMMARY:Burn It Down - ${mod.title}\n`;
+        icsContent += `DESCRIPTION:Workbook reflections for ${mod.title}\n`;
+        icsContent += `DTSTART;VALUE=DATE:${isoStr}\n`;
+        icsContent += `DTEND;VALUE=DATE:${isoStr}\n`;
+        icsContent += "END:VEVENT\n";
+      });
+
+      icsContent += "END:VCALENDAR";
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'Burn_It_Down_Schedule.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('.ICS Calendar File downloaded!');
+    }
+
+    function openDocsExportModal() {
+      let compiledText = `# BURN IT DOWN: WORKBOOK REFLECTIONS\n`;
+      compiledText += `Exported on: ${new Date().toLocaleDateString()}\n`;
+      compiledText += `===========================================\n\n`;
+
+      Object.keys(WORKBOOK_DATA).forEach(dayKey => {
+        if (dayKey === 'dashboard') return;
+        const mod = WORKBOOK_DATA[dayKey];
+        compiledText += `## ${mod.title.toUpperCase()}\n`;
+
+        if (mod.movie) {
+          const watched = appState.moviesWatched[mod.id] ? '[x] Watched' : '[ ] Unwatched';
+          compiledText += `Movie: ${mod.movie.title} (${watched})\n\n`;
+        }
+
+        if (mod.reflections) {
+          mod.reflections.forEach(ref => {
+            const answer = appState.reflections[ref.id] || '(No response provided)';
+            compiledText += `### ${ref.label}\n`;
+            compiledText += `Prompt: ${ref.prompt}\n`;
+            compiledText += `Answer:\n${answer}\n\n`;
+          });
+        }
+        compiledText += `-------------------------------------------\n\n`;
+      });
+
+      document.getElementById('docs-export-text').value = compiledText;
+      document.getElementById('docs-modal').classList.remove('hidden');
+    }
+
+    function closeDocsModal() {
+      document.getElementById('docs-modal').classList.add('hidden');
+    }
+
+    function copyDocsText() {
+      const textarea = document.getElementById('docs-export-text');
+      textarea.select();
+      document.execCommand('copy');
+
+      const btn = document.getElementById('copy-docs-btn');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.classList.add('bg-emerald-600');
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.classList.remove('bg-emerald-600');
+      }, 2000);
+
+      showToast('Copied formatted text! Paste directly into Google Docs.');
+    }
+
+    // Toast Notification helper
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'px-4 py-3 bg-neutral-900 border border-ember-500/50 text-white rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 animate-bounce pointer-events-auto';
+      toast.innerHTML = `<i class="fa-solid fa-fire text-ember-400"></i> ${msg}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Initialization on window load
+    window.onload = function() {
+      initAppState();
+    };
+  </script>
+</body>
+</html>
